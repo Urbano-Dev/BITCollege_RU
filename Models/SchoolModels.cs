@@ -44,6 +44,10 @@ namespace BITCollege_RU.Models
         public double? Grade { get; set; }
 
         public string Notes { get; set; }
+
+        // navigation properties - represents 1 cardinality.
+        public virtual Student Student { get; set; }
+        public virtual Course Course { get; set; }
     }
 
     /// <summary>
@@ -62,6 +66,9 @@ namespace BITCollege_RU.Models
         [Required]
         [Display(Name = "Program\nName")]
         public string Description { get; set; }
+
+        public virtual ICollection<Course> Course { get; set; }
+        public virtual ICollection<Student> Students { get; set; }
     }
 
     /// <summary>
@@ -75,7 +82,7 @@ namespace BITCollege_RU.Models
 
         [Required]
         // Foreign Key annotation reference GradePointState Model.
-        [ForeignKey("Grade")]
+        [ForeignKey(nameof(Grade))]
         public int GradePointStateId { get; set; }
 
         // Foreign Key annotation reference AcademicProgram Model.
@@ -120,11 +127,13 @@ namespace BITCollege_RU.Models
 
         [Required]
         [Display(Name = "Fees")]
-        // Format in currenct and 2 decimal place annotation.
+        // Format in currency and 2 decimal place annotation.
         [DisplayFormat(DataFormatString ="{0:c2}")]
         public double OutstandingFees { get; set; }
         public string Notes { get; set; }
-        public string FullName { get { return String.Format("{0},{1}", FirstName, LastName); } }
+        [Display(Name = "Name")]
+        public string FullName { get { return String.Format("{0} {1}", FirstName, LastName); } }
+        [Display(Name = "Address")]
         public string FullAddress { get { return String.Format("{0} {1}, {2}", Address, City, Province); } }
 
         // navigation properties - represents 1 or 0 - 1 cardinality.
@@ -163,7 +172,11 @@ namespace BITCollege_RU.Models
 
         [Display(Name ="State")]
         // Initialize Extract.State static class in utilities.
-        public string Description { get { return Extract.State(GetType().Name); } } }
+        public string Description { get { return Extract.State(GetType().Name); } }
+
+        public virtual ICollection<Student> Students { get; set; }
+    }
+
 
     /// <summary>
     /// SuspendedState model a member of abstract GradePointState.

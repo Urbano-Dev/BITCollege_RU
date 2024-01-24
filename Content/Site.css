@@ -18,3 +18,12 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/**/
+#multiword_heading th td {
+    white-space: pre-line;
+}
+
+#CreditHours, #TuitionAmount, #AssignmentWeight, #ExamWeight{
+    text-align: right;
+}
