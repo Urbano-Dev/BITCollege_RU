@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Emit;
 using System.Web.Mvc;
 using Utility;
+using System.Data.Entity;
+using BITCollege_RU.Data;
 
 namespace BITCollege_RU.Models
 {
@@ -76,6 +78,7 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class Student
     {
+        private BITCollege_RUContext dbContext = new BITCollege_RUContext();
         // Primary Key annotation
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int StudentId { get; set; }
@@ -136,6 +139,29 @@ namespace BITCollege_RU.Models
         [Display(Name = "Address")]
         public string FullAddress { get { return String.Format("{0} {1}, {2}", Address, City, Province); } }
 
+        // 
+        public void ChangeState() {
+            GradePointState currentState = dbContext.GradePointStates
+                .Where(gradeState => gradeState.GradePointStateId == this.GradePointStateId)
+                .SingleOrDefault();
+
+            currentState.StateChangedCheck(this);
+
+            while (true) {
+                GradePointState updateState = dbContext.GradePointStates
+                    .Where(gradeState => gradeState.GradePointStateId == this.GradePointStateId)
+                    .SingleOrDefault();
+
+                if (currentState == updateState)
+                    break;
+
+                currentState = updateState;
+                currentState.StateChangedCheck(this);
+            }
+
+            dbContext.SaveChanges();
+        }   
+
         // navigation properties - represents 1 or 0 - 1 cardinality.
         public virtual GradePointState Grade { get; set; }
         public virtual AcademicProgram AcademicProgram { get; set; }
@@ -147,6 +173,8 @@ namespace BITCollege_RU.Models
     /// </summary>
     public abstract class GradePointState
     {
+        protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
+       
         // Primary Key annotation and Key annotation.
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key]
@@ -174,6 +202,13 @@ namespace BITCollege_RU.Models
         // Initialize Extract.State static class in utilities.
         public string Description { get { return Extract.State(GetType().Name); } }
 
+        //
+        public double TuitionRateAdjustment(Student student) { return 0; }
+
+        //
+        public void StateChangedCheck(Student student) { }
+
+        // navigation properties - represents 0 - many cardinality.
         public virtual ICollection<Student> Students { get; set; }
     }
 
@@ -183,7 +218,32 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class SuspendedState : GradePointState
     {
-        private static SuspendedState suspendedState;
+        private static SuspendedState suspendedState = new SuspendedState();
+
+        private SuspendedState() {
+            LowerLimit = 0.00;
+            UpperLimit = 1.00;
+            TuitionFactor = 1.1;
+        }
+
+        public static SuspendedState GetInstance() { 
+            if (suspendedState == null) {
+                suspendedState = dbContext.SuspendedStates.SingleOrDefault();
+
+                if (suspendedState == null) {
+                    suspendedState = new SuspendedState();
+
+                    dbContext.GradePointStates.Add(suspendedState);
+                    dbContext.SaveChanges();
+                }
+            }
+
+            return suspendedState; 
+        }
+
+        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+
+        public void StateChangeCheck(Student student) { }
     }
 
     /// <summary>
@@ -191,7 +251,31 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class ProbationState : GradePointState
     {
-        private static ProbationState probationState;
+        private static ProbationState probationState = new ProbationState();
+
+        private ProbationState() {
+            LowerLimit = 1.00;
+            UpperLimit = 2.00;
+            TuitionFactor = 1.075;
+        }
+
+        public static ProbationState GetInstance() { 
+            if (probationState == null) {
+                probationState = dbContext.ProbationStates.SingleOrDefault();
+
+                if (probationState == null) {
+                    probationState = new ProbationState();
+
+                    dbContext.GradePointStates.Add(probationState);
+                    dbContext.SaveChanges();
+                }
+            }
+            return probationState; 
+        }
+
+        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+
+        public void StateChangeCheck(Student student) { }
     }
 
     /// <summary>
@@ -199,7 +283,32 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class RegularState : GradePointState
     {
-        private static RegularState regularState;
+        private static RegularState regularState = new RegularState();
+
+        private RegularState() {
+            LowerLimit = 2.00;
+            UpperLimit = 3.70;
+            TuitionFactor = 1.0;
+        }
+
+        public static RegularState GetInstance() { 
+            if (regularState == null) {
+                regularState = dbContext.RegularStates.SingleOrDefault();
+
+                if (regularState == null) {
+                    regularState = new RegularState();
+
+                    dbContext.GradePointStates.Add(regularState);
+                    dbContext.SaveChanges();
+                }
+            }
+            return regularState; 
+        }
+
+        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+
+        public void StateChangeCheck(Student student) { }
+
     }
 
     /// <summary>
@@ -207,7 +316,31 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class HonoursState : GradePointState
     {
-        private static HonoursState honoursState;
+        private static HonoursState honoursState = new HonoursState();
+
+        private HonoursState() {
+            LowerLimit = 3.70;
+            UpperLimit = 4.50;
+            TuitionFactor = 0.9;
+        }
+
+        public static HonoursState GetInstance() { 
+            if (honoursState == null) {
+                honoursState = dbContext.HonoursStates.SingleOrDefault();
+
+                if (honoursState == null) {
+                    honoursState = new HonoursState();
+
+                    dbContext.GradePointStates.Add(honoursState);
+                    dbContext.SaveChanges();
+                }
+            }
+            return honoursState; 
+        }
+
+        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+
+        public void StateChangeCheck(Student student) { }
     }
 
     /// <summary>

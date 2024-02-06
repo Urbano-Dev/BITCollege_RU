@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: RegularStates
         public ActionResult Index()
         {
-            return View(db.GradePointStates.ToList());
+            return View(RegularState.GetInstance());
         }
 
         // GET: RegularStates/Details/5
