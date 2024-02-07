@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: HonoursStates
         public ActionResult Index()
         {
-            return View(HonoursState.GetInstance());
+            return View(HonoursState.GetInstance);
         }
 
         // GET: HonoursStates/Details/5

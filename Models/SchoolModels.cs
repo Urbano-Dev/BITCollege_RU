@@ -85,7 +85,7 @@ namespace BITCollege_RU.Models
 
         [Required]
         // Foreign Key annotation reference GradePointState Model.
-        [ForeignKey(nameof(Grade))]
+        [ForeignKey("Grade")]
         public int GradePointStateId { get; set; }
 
         // Foreign Key annotation reference AcademicProgram Model.
@@ -139,27 +139,19 @@ namespace BITCollege_RU.Models
         [Display(Name = "Address")]
         public string FullAddress { get { return String.Format("{0} {1}, {2}", Address, City, Province); } }
 
-        // 
-        public void ChangeState() {
-            GradePointState currentState = dbContext.GradePointStates
-                .Where(gradeState => gradeState.GradePointStateId == this.GradePointStateId)
-                .SingleOrDefault();
-
-            currentState.StateChangedCheck(this);
-
+        // Will get the students associated state.
+        public void ChangeState() { 
             while (true) {
-                GradePointState updateState = dbContext.GradePointStates
-                    .Where(gradeState => gradeState.GradePointStateId == this.GradePointStateId)
-                    .SingleOrDefault();
+                // using the data context (dbContext) base on Students GradePointsStateId
+                GradePointState currentState = dbContext.GradePointStates
+                .SingleOrDefault(gradeState => gradeState.GradePointStateId == this.GradePointStateId);
 
-                if (currentState == updateState)
+                currentState.StateChangeCheck(this);
+
+                // break if correct state acquired. 
+                if (currentState.GradePointStateId == this.GradePointStateId) 
                     break;
-
-                currentState = updateState;
-                currentState.StateChangedCheck(this);
             }
-
-            dbContext.SaveChanges();
         }   
 
         // navigation properties - represents 1 or 0 - 1 cardinality.
@@ -202,11 +194,9 @@ namespace BITCollege_RU.Models
         // Initialize Extract.State static class in utilities.
         public string Description { get { return Extract.State(GetType().Name); } }
 
-        //
-        public double TuitionRateAdjustment(Student student) { return 0; }
-
-        //
-        public void StateChangedCheck(Student student) { }
+        // Abstract state.
+        public abstract double TuitionRateAdjustment(Student student);
+        public abstract void StateChangeCheck(Student student);
 
         // navigation properties - represents 0 - many cardinality.
         public virtual ICollection<Student> Students { get; set; }
@@ -218,32 +208,45 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class SuspendedState : GradePointState
     {
-        private static SuspendedState suspendedState = new SuspendedState();
+        // Singleton instance of SuspendedState, ensures only one instance is created
+        private static SuspendedState _suspendedState;
 
+        // Private constructor for SuspendedState, sets default properties
         private SuspendedState() {
             LowerLimit = 0.00;
             UpperLimit = 1.00;
             TuitionFactor = 1.1;
         }
 
-        public static SuspendedState GetInstance() { 
-            if (suspendedState == null) {
-                suspendedState = dbContext.SuspendedStates.SingleOrDefault();
+        // Singleton pattern implementation to get the instance of SuspendedState
+        public static SuspendedState GetInstance {
+            get {
+                if (_suspendedState == null) {
+                    _suspendedState = dbContext.SuspendedStates.SingleOrDefault();
 
-                if (suspendedState == null) {
-                    suspendedState = new SuspendedState();
-
-                    dbContext.GradePointStates.Add(suspendedState);
-                    dbContext.SaveChanges();
+                    if (_suspendedState == null) {
+                        _suspendedState = new SuspendedState();
+                        dbContext.GradePointStates.Add(_suspendedState);
+                    }
                 }
+                return _suspendedState;
             }
-
-            return suspendedState; 
         }
 
-        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) {
+            return TuitionFactor;
+        }
 
-        public void StateChangeCheck(Student student) { }
+        // Overrides the StateChangeCheck method from the base class GradePointState
+        // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
+        // Persists the changes to the database
+        public override void StateChangeCheck(Student student) {
+            if (student.GradePointAverage > UpperLimit) {
+                student.GradePointStateId = ProbationState.GetInstance.GradePointStateId;
+            }
+
+            dbContext.SaveChanges();
+        }
     }
 
     /// <summary>
@@ -251,31 +254,46 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class ProbationState : GradePointState
     {
-        private static ProbationState probationState = new ProbationState();
+        // Singleton instance of ProbationState, ensures only one instance is created.
+        private static ProbationState _probationState;
 
+        // Private constructor for ProbationState, sets default properties.
         private ProbationState() {
             LowerLimit = 1.00;
             UpperLimit = 2.00;
             TuitionFactor = 1.075;
         }
 
-        public static ProbationState GetInstance() { 
-            if (probationState == null) {
-                probationState = dbContext.ProbationStates.SingleOrDefault();
+        // Singleton pattern implementation to get the instance of ProbationState.
+        public static ProbationState GetInstance {
+            get {
+                if (_probationState == null) {
+                    _probationState = dbContext.ProbationStates.SingleOrDefault();
 
-                if (probationState == null) {
-                    probationState = new ProbationState();
+                    if (_probationState == null) {
+                        _probationState = new ProbationState();
 
-                    dbContext.GradePointStates.Add(probationState);
-                    dbContext.SaveChanges();
+                        dbContext.GradePointStates.Add(_probationState);
+                    }
                 }
+                return _probationState;
             }
-            return probationState; 
         }
 
-        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
 
-        public void StateChangeCheck(Student student) { }
+        // Overrides the StateChangeCheck method from the base class GradePointState
+        // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
+        // Persists the changes to the database
+        public override void StateChangeCheck(Student student) { 
+            if (student.GradePointAverage > UpperLimit) {
+                student.GradePointStateId = RegularState.GetInstance.GradePointStateId;
+            }
+            else if (student.GradePointAverage < LowerLimit) {
+                student.GradePointStateId = SuspendedState.GetInstance.GradePointStateId;
+            }
+            dbContext.SaveChanges();
+        }
     }
 
     /// <summary>
@@ -283,31 +301,45 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class RegularState : GradePointState
     {
-        private static RegularState regularState = new RegularState();
+        // Singleton instance of RegularState, ensures only one instance is created
+        private static RegularState _regularState;
 
+        // Private constructor for RegularState, sets default properties
         private RegularState() {
             LowerLimit = 2.00;
             UpperLimit = 3.70;
             TuitionFactor = 1.0;
         }
 
-        public static RegularState GetInstance() { 
-            if (regularState == null) {
-                regularState = dbContext.RegularStates.SingleOrDefault();
+        // Singleton pattern implementation to get the instance of RegularState
+        public static RegularState GetInstance {
+            get {
+                if (_regularState == null) {
+                    _regularState = dbContext.RegularStates.SingleOrDefault();
 
-                if (regularState == null) {
-                    regularState = new RegularState();
+                    if (_regularState == null) {
+                        _regularState = new RegularState();
 
-                    dbContext.GradePointStates.Add(regularState);
-                    dbContext.SaveChanges();
+                        dbContext.GradePointStates.Add(_regularState);
+                    }
                 }
+                return _regularState;
             }
-            return regularState; 
         }
 
-        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
 
-        public void StateChangeCheck(Student student) { }
+        // Overrides the StateChangeCheck method from the base class GradePointState
+        // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
+        // Persists the changes to the database
+        public override void StateChangeCheck(Student student) { 
+            if (student.GradePointAverage > UpperLimit) {
+                student.GradePointStateId = HonoursState.GetInstance.GradePointStateId;    
+            } else if (student.GradePointAverage < LowerLimit) {
+                student.GradePointStateId = ProbationState.GetInstance.GradePointStateId;
+            }
+            dbContext.SaveChanges();
+        }
 
     }
 
@@ -316,31 +348,44 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class HonoursState : GradePointState
     {
-        private static HonoursState honoursState = new HonoursState();
+        // Singleton instance of HonoursState, ensures only one instance is created.
+        private static HonoursState _honoursState;
 
+        // Private constructor for HonoursState, sets default properties
         private HonoursState() {
             LowerLimit = 3.70;
             UpperLimit = 4.50;
             TuitionFactor = 0.9;
         }
 
-        public static HonoursState GetInstance() { 
-            if (honoursState == null) {
-                honoursState = dbContext.HonoursStates.SingleOrDefault();
+        // Singleton pattern implementation to get the instance of HonoursState
+        public static HonoursState GetInstance {
+            get {
+                if (_honoursState == null) {
+                    _honoursState = dbContext.HonoursStates.SingleOrDefault();
 
-                if (honoursState == null) {
-                    honoursState = new HonoursState();
+                    if (_honoursState == null) {
+                        _honoursState = new HonoursState();
 
-                    dbContext.GradePointStates.Add(honoursState);
-                    dbContext.SaveChanges();
+                        dbContext.GradePointStates.Add(_honoursState);
+                    }
                 }
+                return _honoursState;
             }
-            return honoursState; 
         }
+        
+        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
 
-        public double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        // Overrides the StateChangeCheck method from the base class GradePointState
+        // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
+        // Persists the changes to the database
+        public override void StateChangeCheck(Student student) { 
+            if (student.GradePointAverage < LowerLimit) {
+                student.GradePointStateId = RegularState.GetInstance.GradePointStateId;
+            }
 
-        public void StateChangeCheck(Student student) { }
+            dbContext.SaveChanges();
+        }
     }
 
     /// <summary>

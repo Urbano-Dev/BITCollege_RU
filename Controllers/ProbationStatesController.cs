@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: ProbationStates
         public ActionResult Index()
         {
-            return View(ProbationState.GetInstance());
+            return View(ProbationState.GetInstance);
         }
 
         // GET: ProbationStates/Details/5
