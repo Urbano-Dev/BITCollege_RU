@@ -47,6 +47,9 @@ namespace BITCollege_RU.Models
 
         public string Notes { get; set; }
 
+        //
+        public void SetNextRegistrationNumber() { }
+
         // navigation properties - represents 1 cardinality.
         public virtual Student Student { get; set; }
         public virtual Course Course { get; set; }
@@ -153,6 +156,9 @@ namespace BITCollege_RU.Models
                     break;
             }
         }   
+
+        //
+        public void SetNextStudentNumber() { }
 
         // navigation properties - represents 1 or 0 - 1 cardinality.
         public virtual GradePointState Grade { get; set; }
@@ -426,6 +432,8 @@ namespace BITCollege_RU.Models
 
         public string Notes { get; set; }
 
+        public abstract void SetNextCourseNumber();
+
         // navigation property - represents 0 to many relationship.
         public ICollection<AcademicProgram> AcademicProgram { get; set; }
         public ICollection<Registration> Registration { get; set; }
@@ -447,6 +455,12 @@ namespace BITCollege_RU.Models
         [DisplayFormat(DataFormatString = "{0:N2}")]
         [Display(Name = "Exams")]
         public double ExamWeight { get; set; }
+
+        //
+        public override void SetNextCourseNumber()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>
@@ -454,7 +468,11 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class AuditCourse : Course
     {
-        
+        //
+        public override void SetNextCourseNumber()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>
@@ -465,5 +483,87 @@ namespace BITCollege_RU.Models
         [Required]
         [Display(Name ="Maximum\nAttempts")]
         public int MaximumAttempts { get; set; }
+
+        //
+        public override void SetNextCourseNumber()
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
+public abstract class NextUniqueNumber 
+{
+    [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+    public int NextUniqueNumberId { get; set; }
+
+    public long NextAvailableNumber { get; set; }
+}
+
+public class NextStudent : NextUniqueNumber
+{
+    private static NextStudent _nextStudent;
+
+    private NextStudent() { }
+
+    public static NextStudent GetInstance()
+    {
+        return _nextStudent;
+    }
+}
+
+public class NextRegistration : NextUniqueNumber
+{
+    private static NextRegistration _nextRegistration;
+
+    private NextRegistration() { }
+
+    public NextRegistration GetInstance()
+    {
+        return _nextRegistration;
+    }
+}
+
+public class NextGradeCourse : NextUniqueNumber
+{
+    private static NextGradeCourse _nextGradeCourse;
+
+    private NextGradeCourse() { }
+
+    public NextGradeCourse GetInstance()
+    {
+        return _nextGradeCourse;
+    }
+}
+
+public class NextAuditCourse : NextUniqueNumber
+{
+    private static NextAuditCourse _nextAuditCourse;
+
+    private NextAuditCourse() { }
+
+    public NextAuditCourse GetInstance()
+    {
+        return _nextAuditCourse;
+    }
+}
+
+public class NextMasteryCourse : NextUniqueNumber
+{
+    private NextMasteryCourse _nextMasteryCourse;
+
+    private NextMasteryCourse() { }
+
+    public NextMasteryCourse GetInstance()
+    {
+        return _nextMasteryCourse;
+    }
+}
+
+public class StoredProcedure
+{
+    public static long? NextUniqueNumber(string discriminator)
+    {
+        return 0;
     }
 }
