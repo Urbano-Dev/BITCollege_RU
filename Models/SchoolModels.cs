@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using Utility;
 using System.Data.Entity;
 using BITCollege_RU.Data;
+using BITCollege_RU.Models;
 
 namespace BITCollege_RU.Models
 {
@@ -494,9 +495,13 @@ namespace BITCollege_RU.Models
 
 public abstract class NextUniqueNumber 
 {
+    protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
+
     [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+    [Key]
     public int NextUniqueNumberId { get; set; }
 
+    [Required]
     public long NextAvailableNumber { get; set; }
 }
 
@@ -504,11 +509,26 @@ public class NextStudent : NextUniqueNumber
 {
     private static NextStudent _nextStudent;
 
-    private NextStudent() { }
+    private NextStudent() {
+        NextAvailableNumber = 20000000;
+    }
 
-    public static NextStudent GetInstance()
+    public static NextStudent GetInstance
     {
-        return _nextStudent;
+        get {
+            if (_nextStudent == null)
+            {
+                _nextStudent = dbContext.NextStudents.SingleOrDefault();
+
+                if (_nextStudent == null)
+                {
+                   _nextStudent = new NextStudent();
+
+                    dbContext.NextUniqueNumbers.Add(_nextStudent);
+                }
+            }
+            return _nextStudent;
+        }
     }
 }
 
@@ -516,23 +536,55 @@ public class NextRegistration : NextUniqueNumber
 {
     private static NextRegistration _nextRegistration;
 
-    private NextRegistration() { }
+    private NextRegistration() {
+        NextAvailableNumber = 700;
+    }
 
-    public NextRegistration GetInstance()
+    public static NextRegistration GetInstance
     {
-        return _nextRegistration;
+        get
+        {
+            if (_nextRegistration == null)
+            {
+                _nextRegistration = dbContext.NextRegistrations.SingleOrDefault();
+
+                if (_nextRegistration == null)
+                {
+                    _nextRegistration = new NextRegistration();
+
+                    dbContext.NextUniqueNumbers.Add(_nextRegistration);
+                }
+            }
+            return _nextRegistration;
+        }
     }
 }
 
-public class NextGradeCourse : NextUniqueNumber
+public class NextGradedCourse : NextUniqueNumber
 {
-    private static NextGradeCourse _nextGradeCourse;
+    private static NextGradedCourse _nextGradedCourse;
 
-    private NextGradeCourse() { }
+    private NextGradedCourse() {
+        NextAvailableNumber = 200000;
+    }
 
-    public NextGradeCourse GetInstance()
+    public static NextGradedCourse GetInstance
     {
-        return _nextGradeCourse;
+        get
+        {
+            if (_nextGradedCourse == null)
+            {
+                _nextGradedCourse = dbContext.NextGradedCourses.SingleOrDefault();
+
+                if (_nextGradedCourse == null)
+                {
+                    _nextGradedCourse = new NextGradedCourse();
+
+                    dbContext.NextUniqueNumbers.Add(_nextGradedCourse);
+                }
+            }
+            return _nextGradedCourse;
+        }
     }
 }
 
@@ -540,23 +592,55 @@ public class NextAuditCourse : NextUniqueNumber
 {
     private static NextAuditCourse _nextAuditCourse;
 
-    private NextAuditCourse() { }
+    private NextAuditCourse() {
+        NextAvailableNumber = 2000;
+    }
 
-    public NextAuditCourse GetInstance()
+    public static NextAuditCourse GetInstance
     {
-        return _nextAuditCourse;
+        get 
+        {
+            if (_nextAuditCourse == null)
+            {
+                _nextAuditCourse = dbContext.NextAuditCourses.SingleOrDefault();
+
+                if (_nextAuditCourse == null)
+                {
+                    _nextAuditCourse = new NextAuditCourse();
+
+                    dbContext.NextUniqueNumbers.Add(_nextAuditCourse);
+                }
+            }
+            return _nextAuditCourse;
+        }
     }
 }
 
 public class NextMasteryCourse : NextUniqueNumber
 {
-    private NextMasteryCourse _nextMasteryCourse;
+    private static NextMasteryCourse _nextMasteryCourse;
 
-    private NextMasteryCourse() { }
+    private NextMasteryCourse() {
+        NextAvailableNumber = 20000;
+    }
 
-    public NextMasteryCourse GetInstance()
+    public static NextMasteryCourse GetInstance
     {
-        return _nextMasteryCourse;
+        get
+        {
+            if (_nextMasteryCourse == null)
+            {
+                _nextMasteryCourse = dbContext.NextMasteryCourses.SingleOrDefault();
+
+                if (_nextMasteryCourse == null)
+                {
+                    _nextMasteryCourse = new NextMasteryCourse();
+
+                    dbContext.NextUniqueNumbers.Add(_nextMasteryCourse);
+                }
+            }
+            return _nextMasteryCourse;
+        }
     }
 }
 
