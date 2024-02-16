@@ -150,6 +150,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202402160034545_initial_migration.cs" />
+    <Compile Include="Migrations\202402160034545_initial_migration.designer.cs">
+      <DependentUpon>202402160034545_initial_migration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\SchoolModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -309,6 +314,11 @@
       <Project>{39ee02e5-5786-4c05-be13-a9cca941f3a8}</Project>
       <Name>Utility</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202402160034545_initial_migration.resx">
+      <DependentUpon>202402160034545_initial_migration.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
