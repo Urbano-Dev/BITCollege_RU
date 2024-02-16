@@ -51,8 +51,11 @@ namespace BITCollege_RU.Models
 
         public string Notes { get; set; }
 
-        //
-        public void SetNextRegistrationNumber() { RegistraionNumber = (long)StoredProcedure.NextNumber(NextRegistration.GetInstance.ToString()); }
+        //Sets the next registration number of the new Registration.
+        public void SetNextRegistrationNumber() 
+        {
+            RegistraionNumber = (long)StoredProcedure.NextNumber(nameof(NextRegistration)); 
+        }
 
         // navigation properties - represents 1 cardinality.
         public virtual Student Student { get; set; }
@@ -150,22 +153,20 @@ namespace BITCollege_RU.Models
             while (true)
             {
                 // using the data context (dbContext) base on Students GradePointsStateId
-                GradePointState currentState = dbContext.GradePointStates
-                .SingleOrDefault(gradeState => gradeState.GradePointStateId == this.GradePointStateId);
+                GradePointState currentState = dbContext.GradePointStates.SingleOrDefault(gradeState => gradeState.GradePointStateId == GradePointStateId);
 
                 currentState.StateChangeCheck(this);
 
                 // break if correct state acquired. 
-                if (currentState.GradePointStateId == this.GradePointStateId)
+                if (currentState.GradePointStateId == GradePointStateId)
                     break;
             }
         }
 
-        //
+        // Sets the next student number for the new student.
         public void SetNextStudentNumber() 
         {
-            
-            StudentNumber = (long)StoredProcedure.NextNumber(NextStudent.GetInstance.ToString());
+            StudentNumber = (long)StoredProcedure.NextNumber(nameof(NextStudent));
         }
 
         // navigation properties - represents 1 or 0 - 1 cardinality.
@@ -503,10 +504,10 @@ namespace BITCollege_RU.Models
         [Display(Name = "Exams")]
         public double ExamWeight { get; set; }
 
-        //
+        // Sets the next graded course number for the new graded course.
         public override void SetNextCourseNumber()
         {
-            CourseNumber = $"G-{StoredProcedure.NextNumber(NextGradedCourse.GetInstance.ToString())}";
+            CourseNumber = $"G-{StoredProcedure.NextNumber(nameof(NextGradedCourse))}";
         }
     }
 
@@ -515,10 +516,10 @@ namespace BITCollege_RU.Models
     /// </summary>
     public class AuditCourse : Course
     {
-        //
+        // Sets the next audit course number for the new audit course.
         public override void SetNextCourseNumber()
         {
-            CourseNumber = $"A-{StoredProcedure.NextNumber(NextAuditCourse.GetInstance.ToString())}";
+            CourseNumber = $"A-{StoredProcedure.NextNumber(nameof(NextAuditCourse))}";
         }
     }
 
@@ -531,17 +532,22 @@ namespace BITCollege_RU.Models
         [Display(Name = "Maximum\nAttempts")]
         public int MaximumAttempts { get; set; }
 
-        //
+        // Sets the next master course number for the new mastery course
         public override void SetNextCourseNumber()
         {
-            CourseNumber = $"M-{StoredProcedure.NextNumber(NextMasteryCourse.GetInstance.ToString())}";
+            CourseNumber = $"M-{StoredProcedure.NextNumber(nameof(NextMasteryCourse))}";
         }
     }
 
+    /// <summary>
+    /// NextUniqueNumber abstract model represents the NextUniqueNumbers table.
+    /// </summary>
     public abstract class NextUniqueNumber
     {
+        // Initialize database context for the use of sub classes.
         protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
 
+        // Primary Key and Key annotation.
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key]
         public int NextUniqueNumberId { get; set; }
@@ -550,6 +556,9 @@ namespace BITCollege_RU.Models
         public long NextAvailableNumber { get; set; }
     }
 
+    /// <summary>
+    /// NextStudent model a member of abstract NextUniqueNumber
+    /// </summary>
     public class NextStudent : NextUniqueNumber
     {
         private static NextStudent _nextStudent;
@@ -579,6 +588,9 @@ namespace BITCollege_RU.Models
         }
     }
 
+    /// <summary>
+    /// NextRegistration model a member of abstract NextUniqueNumber
+    /// </summary>
     public class NextRegistration : NextUniqueNumber
     {
         private static NextRegistration _nextRegistration;
@@ -608,6 +620,9 @@ namespace BITCollege_RU.Models
         }
     }
 
+    /// <summary>
+    /// NextGradedCourse model a member of abstract NextUniqueNumber
+    /// </summary>
     public class NextGradedCourse : NextUniqueNumber
     {
         private static NextGradedCourse _nextGradedCourse;
@@ -637,6 +652,9 @@ namespace BITCollege_RU.Models
         }
     }
 
+    /// <summary>
+    /// NextAuditCourse model a member of abstract NextUniqueNumber
+    /// </summary>
     public class NextAuditCourse : NextUniqueNumber
     {
         private static NextAuditCourse _nextAuditCourse;
@@ -666,6 +684,9 @@ namespace BITCollege_RU.Models
         }
     }
 
+    /// <summary>
+    /// NextMasteryCourse model a member of abstract NextUniqueNumber
+    /// </summary>
     public class NextMasteryCourse : NextUniqueNumber
     {
         private static NextMasteryCourse _nextMasteryCourse;
@@ -695,16 +716,24 @@ namespace BITCollege_RU.Models
         }
     }
 
+    /// <summary>
+    /// Executes the SQL Server stored procedures.
+    /// </summary>
     public class StoredProcedure
     {
+        /// <summary>
+        /// Sets the next available number. returns null if exception occurs.
+        /// </summary>
+        /// <param name="discriminator">the instance of a NextUniqueNumber subclass.</param>
+        /// <returns>Return - the next number for the appropriate properties. </returns>
         public static long? NextNumber(string discriminator)
         {            
             long? returnValue = 0;
+
             try
             {
 
-            SqlConnection connection = new SqlConnection("Data Source=localhost; " +
-            "Initial Catalog=BITCollege_FLContext;Integrated Security=True");
+            SqlConnection connection = new SqlConnection("Data Source=DESKTOP-JOQ48A3\\BOX;Initial Catalog=BITCollege_RUContext;Integrated Security=True");
             SqlCommand storedProcedure = new SqlCommand("next_number", connection);
             storedProcedure.CommandType = CommandType.StoredProcedure;
             storedProcedure.Parameters.AddWithValue("@Discriminator", discriminator);
@@ -717,12 +746,13 @@ namespace BITCollege_RU.Models
             storedProcedure.ExecuteNonQuery();
             connection.Close();
             returnValue = (long?)outputParameter.Value;
-            } 
+            }
+            // Throws null if exception occurs.
             catch (Exception)
             {
-                return returnValue;
+                returnValue = null;
             }
-
+            
             return returnValue;
         }
     }
