@@ -33,17 +33,17 @@ namespace BITCollege_RU.Models
         public int CourseId { get; set; }
 
         [Required]
-        [Display(Name ="Registration\nNumber")]
+        [Display(Name = "Registration\nNumber")]
         public long RegistraionNumber { get; set; }
 
         [Required]
-        [Display(Name ="Date")]
+        [Display(Name = "Date")]
         // Display into a date format annotation.
-        [DisplayFormat(DataFormatString ="{0:d}")]
+        [DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime RegistrationDate { get; set; }
 
-        [DisplayFormat(NullDisplayText ="Ungraded")]
-        [Range(0,1)]
+        [DisplayFormat(NullDisplayText = "Ungraded")]
+        [Range(0, 1)]
         public double? Grade { get; set; }
 
         public string Notes { get; set; }
@@ -66,7 +66,7 @@ namespace BITCollege_RU.Models
         public int AcademicProgramId { get; set; }
 
         [Required]
-        [Display(Name ="Program")]
+        [Display(Name = "Program")]
         public string ProgramAcronym { get; set; }
 
         [Required]
@@ -97,7 +97,7 @@ namespace BITCollege_RU.Models
         public int? AcademicProgramId { get; set; }
 
         [Required]
-        [Range(10000000, 99999999)] 
+        [Range(10000000, 99999999)]
         [Display(Name = "Student\nNumber")]
         public long StudentNumber { get; set; }
 
@@ -135,7 +135,7 @@ namespace BITCollege_RU.Models
         [Required]
         [Display(Name = "Fees")]
         // Format in currency and 2 decimal place annotation.
-        [DisplayFormat(DataFormatString ="{0:c2}")]
+        [DisplayFormat(DataFormatString = "{0:c2}")]
         public double OutstandingFees { get; set; }
         public string Notes { get; set; }
         [Display(Name = "Name")]
@@ -144,8 +144,10 @@ namespace BITCollege_RU.Models
         public string FullAddress { get { return String.Format("{0} {1}, {2}", Address, City, Province); } }
 
         // Will get the students associated state.
-        public void ChangeState() { 
-            while (true) {
+        public void ChangeState()
+        {
+            while (true)
+            {
                 // using the data context (dbContext) base on Students GradePointsStateId
                 GradePointState currentState = dbContext.GradePointStates
                 .SingleOrDefault(gradeState => gradeState.GradePointStateId == this.GradePointStateId);
@@ -153,10 +155,10 @@ namespace BITCollege_RU.Models
                 currentState.StateChangeCheck(this);
 
                 // break if correct state acquired. 
-                if (currentState.GradePointStateId == this.GradePointStateId) 
+                if (currentState.GradePointStateId == this.GradePointStateId)
                     break;
             }
-        }   
+        }
 
         //
         public void SetNextStudentNumber() { }
@@ -173,16 +175,16 @@ namespace BITCollege_RU.Models
     public abstract class GradePointState
     {
         protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
-       
+
         // Primary Key annotation and Key annotation.
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key]
         public int GradePointStateId { get; set; }
 
         [Required]
-        [Display(Name ="Lower\nLimit")]
+        [Display(Name = "Lower\nLimit")]
         // Format in 2 decimal place annotation.
-        [DisplayFormat(DataFormatString ="{0:N2}")]
+        [DisplayFormat(DataFormatString = "{0:N2}")]
         public double LowerLimit { get; set; }
 
         [Required]
@@ -197,7 +199,7 @@ namespace BITCollege_RU.Models
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public double TuitionFactor { get; set; }
 
-        [Display(Name ="State")]
+        [Display(Name = "State")]
         // Initialize Extract.State static class in utilities.
         public string Description { get { return Extract.State(GetType().Name); } }
 
@@ -219,19 +221,24 @@ namespace BITCollege_RU.Models
         private static SuspendedState _suspendedState;
 
         // Private constructor for SuspendedState, sets default properties
-        private SuspendedState() {
+        private SuspendedState()
+        {
             LowerLimit = 0.00;
             UpperLimit = 1.00;
             TuitionFactor = 1.1;
         }
 
         // Singleton pattern implementation to get the instance of SuspendedState
-        public static SuspendedState GetInstance {
-            get {
-                if (_suspendedState == null) {
+        public static SuspendedState GetInstance
+        {
+            get
+            {
+                if (_suspendedState == null)
+                {
                     _suspendedState = dbContext.SuspendedStates.SingleOrDefault();
 
-                    if (_suspendedState == null) {
+                    if (_suspendedState == null)
+                    {
                         _suspendedState = new SuspendedState();
                         dbContext.GradePointStates.Add(_suspendedState);
                     }
@@ -240,15 +247,18 @@ namespace BITCollege_RU.Models
             }
         }
 
-        public override double TuitionRateAdjustment(Student student) {
+        public override double TuitionRateAdjustment(Student student)
+        {
             return TuitionFactor;
         }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
         // Persists the changes to the database
-        public override void StateChangeCheck(Student student) {
-            if (student.GradePointAverage > UpperLimit) {
+        public override void StateChangeCheck(Student student)
+        {
+            if (student.GradePointAverage > UpperLimit)
+            {
                 student.GradePointStateId = ProbationState.GetInstance.GradePointStateId;
             }
 
@@ -265,19 +275,24 @@ namespace BITCollege_RU.Models
         private static ProbationState _probationState;
 
         // Private constructor for ProbationState, sets default properties.
-        private ProbationState() {
+        private ProbationState()
+        {
             LowerLimit = 1.00;
             UpperLimit = 2.00;
             TuitionFactor = 1.075;
         }
 
         // Singleton pattern implementation to get the instance of ProbationState.
-        public static ProbationState GetInstance {
-            get {
-                if (_probationState == null) {
+        public static ProbationState GetInstance
+        {
+            get
+            {
+                if (_probationState == null)
+                {
                     _probationState = dbContext.ProbationStates.SingleOrDefault();
 
-                    if (_probationState == null) {
+                    if (_probationState == null)
+                    {
                         _probationState = new ProbationState();
 
                         dbContext.GradePointStates.Add(_probationState);
@@ -292,11 +307,14 @@ namespace BITCollege_RU.Models
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
         // Persists the changes to the database
-        public override void StateChangeCheck(Student student) { 
-            if (student.GradePointAverage > UpperLimit) {
+        public override void StateChangeCheck(Student student)
+        {
+            if (student.GradePointAverage > UpperLimit)
+            {
                 student.GradePointStateId = RegularState.GetInstance.GradePointStateId;
             }
-            else if (student.GradePointAverage < LowerLimit) {
+            else if (student.GradePointAverage < LowerLimit)
+            {
                 student.GradePointStateId = SuspendedState.GetInstance.GradePointStateId;
             }
             dbContext.SaveChanges();
@@ -312,19 +330,24 @@ namespace BITCollege_RU.Models
         private static RegularState _regularState;
 
         // Private constructor for RegularState, sets default properties
-        private RegularState() {
+        private RegularState()
+        {
             LowerLimit = 2.00;
             UpperLimit = 3.70;
             TuitionFactor = 1.0;
         }
 
         // Singleton pattern implementation to get the instance of RegularState
-        public static RegularState GetInstance {
-            get {
-                if (_regularState == null) {
+        public static RegularState GetInstance
+        {
+            get
+            {
+                if (_regularState == null)
+                {
                     _regularState = dbContext.RegularStates.SingleOrDefault();
 
-                    if (_regularState == null) {
+                    if (_regularState == null)
+                    {
                         _regularState = new RegularState();
 
                         dbContext.GradePointStates.Add(_regularState);
@@ -339,10 +362,14 @@ namespace BITCollege_RU.Models
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
         // Persists the changes to the database
-        public override void StateChangeCheck(Student student) { 
-            if (student.GradePointAverage > UpperLimit) {
-                student.GradePointStateId = HonoursState.GetInstance.GradePointStateId;    
-            } else if (student.GradePointAverage < LowerLimit) {
+        public override void StateChangeCheck(Student student)
+        {
+            if (student.GradePointAverage > UpperLimit)
+            {
+                student.GradePointStateId = HonoursState.GetInstance.GradePointStateId;
+            }
+            else if (student.GradePointAverage < LowerLimit)
+            {
                 student.GradePointStateId = ProbationState.GetInstance.GradePointStateId;
             }
             dbContext.SaveChanges();
@@ -359,19 +386,24 @@ namespace BITCollege_RU.Models
         private static HonoursState _honoursState;
 
         // Private constructor for HonoursState, sets default properties
-        private HonoursState() {
+        private HonoursState()
+        {
             LowerLimit = 3.70;
             UpperLimit = 4.50;
             TuitionFactor = 0.9;
         }
 
         // Singleton pattern implementation to get the instance of HonoursState
-        public static HonoursState GetInstance {
-            get {
-                if (_honoursState == null) {
+        public static HonoursState GetInstance
+        {
+            get
+            {
+                if (_honoursState == null)
+                {
                     _honoursState = dbContext.HonoursStates.SingleOrDefault();
 
-                    if (_honoursState == null) {
+                    if (_honoursState == null)
+                    {
                         _honoursState = new HonoursState();
 
                         dbContext.GradePointStates.Add(_honoursState);
@@ -380,14 +412,16 @@ namespace BITCollege_RU.Models
                 return _honoursState;
             }
         }
-        
+
         public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
         // Persists the changes to the database
-        public override void StateChangeCheck(Student student) { 
-            if (student.GradePointAverage < LowerLimit) {
+        public override void StateChangeCheck(Student student)
+        {
+            if (student.GradePointAverage < LowerLimit)
+            {
                 student.GradePointStateId = RegularState.GetInstance.GradePointStateId;
             }
 
@@ -410,7 +444,7 @@ namespace BITCollege_RU.Models
         public int? AcademicProgramId { get; set; }
 
         [Required]
-        [Display(Name ="Course\nNumber")]
+        [Display(Name = "Course\nNumber")]
         public string CourseNumber { get; set; }
 
         [Required]
@@ -418,8 +452,8 @@ namespace BITCollege_RU.Models
 
         [Required]
         // Format in 2 decimal place annotation.
-        [DisplayFormat(DataFormatString ="{0:N2}")]
-        [Display(Name ="Credit\nHours")]
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        [Display(Name = "Credit\nHours")]
         public double CreditHours { get; set; }
 
         [Required]
@@ -428,7 +462,7 @@ namespace BITCollege_RU.Models
         [Display(Name = "Tuition")]
         public double TuitionAmount { get; set; }
 
-        [Display(Name ="Course\nType")]
+        [Display(Name = "Course\nType")]
         public string CourseType { get { return Extract.State(GetType().Name); } }
 
         public string Notes { get; set; }
@@ -482,7 +516,7 @@ namespace BITCollege_RU.Models
     public class MasteryCourse : Course
     {
         [Required]
-        [Display(Name ="Maximum\nAttempts")]
+        [Display(Name = "Maximum\nAttempts")]
         public int MaximumAttempts { get; set; }
 
         //
@@ -491,163 +525,169 @@ namespace BITCollege_RU.Models
             throw new NotImplementedException();
         }
     }
-}
 
-public abstract class NextUniqueNumber 
-{
-    protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
+    public abstract class NextUniqueNumber
+    {
+        protected static BITCollege_RUContext dbContext = new BITCollege_RUContext();
 
-    [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
-    [Key]
-    public int NextUniqueNumberId { get; set; }
+        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        [Key]
+        public int NextUniqueNumberId { get; set; }
 
-    [Required]
-    public long NextAvailableNumber { get; set; }
-}
-
-public class NextStudent : NextUniqueNumber
-{
-    private static NextStudent _nextStudent;
-
-    private NextStudent() {
-        NextAvailableNumber = 20000000;
+        [Required]
+        public long NextAvailableNumber { get; set; }
     }
 
-    public static NextStudent GetInstance
+    public class NextStudent : NextUniqueNumber
     {
-        get {
-            if (_nextStudent == null)
-            {
-                _nextStudent = dbContext.NextStudents.SingleOrDefault();
+        private static NextStudent _nextStudent;
 
+        private NextStudent()
+        {
+            NextAvailableNumber = 20000000;
+        }
+
+        public static NextStudent GetInstance
+        {
+            get
+            {
                 if (_nextStudent == null)
                 {
-                   _nextStudent = new NextStudent();
+                    _nextStudent = dbContext.NextStudents.SingleOrDefault();
 
-                    dbContext.NextUniqueNumbers.Add(_nextStudent);
+                    if (_nextStudent == null)
+                    {
+                        _nextStudent = new NextStudent();
+
+                        dbContext.NextUniqueNumbers.Add(_nextStudent);
+                    }
                 }
+                return _nextStudent;
             }
-            return _nextStudent;
         }
     }
-}
 
-public class NextRegistration : NextUniqueNumber
-{
-    private static NextRegistration _nextRegistration;
-
-    private NextRegistration() {
-        NextAvailableNumber = 700;
-    }
-
-    public static NextRegistration GetInstance
+    public class NextRegistration : NextUniqueNumber
     {
-        get
-        {
-            if (_nextRegistration == null)
-            {
-                _nextRegistration = dbContext.NextRegistrations.SingleOrDefault();
+        private static NextRegistration _nextRegistration;
 
+        private NextRegistration()
+        {
+            NextAvailableNumber = 700;
+        }
+
+        public static NextRegistration GetInstance
+        {
+            get
+            {
                 if (_nextRegistration == null)
                 {
-                    _nextRegistration = new NextRegistration();
+                    _nextRegistration = dbContext.NextRegistrations.SingleOrDefault();
 
-                    dbContext.NextUniqueNumbers.Add(_nextRegistration);
+                    if (_nextRegistration == null)
+                    {
+                        _nextRegistration = new NextRegistration();
+
+                        dbContext.NextUniqueNumbers.Add(_nextRegistration);
+                    }
                 }
+                return _nextRegistration;
             }
-            return _nextRegistration;
         }
     }
-}
 
-public class NextGradedCourse : NextUniqueNumber
-{
-    private static NextGradedCourse _nextGradedCourse;
-
-    private NextGradedCourse() {
-        NextAvailableNumber = 200000;
-    }
-
-    public static NextGradedCourse GetInstance
+    public class NextGradedCourse : NextUniqueNumber
     {
-        get
-        {
-            if (_nextGradedCourse == null)
-            {
-                _nextGradedCourse = dbContext.NextGradedCourses.SingleOrDefault();
+        private static NextGradedCourse _nextGradedCourse;
 
+        private NextGradedCourse()
+        {
+            NextAvailableNumber = 200000;
+        }
+
+        public static NextGradedCourse GetInstance
+        {
+            get
+            {
                 if (_nextGradedCourse == null)
                 {
-                    _nextGradedCourse = new NextGradedCourse();
+                    _nextGradedCourse = dbContext.NextGradedCourses.SingleOrDefault();
 
-                    dbContext.NextUniqueNumbers.Add(_nextGradedCourse);
+                    if (_nextGradedCourse == null)
+                    {
+                        _nextGradedCourse = new NextGradedCourse();
+
+                        dbContext.NextUniqueNumbers.Add(_nextGradedCourse);
+                    }
                 }
+                return _nextGradedCourse;
             }
-            return _nextGradedCourse;
         }
     }
-}
 
-public class NextAuditCourse : NextUniqueNumber
-{
-    private static NextAuditCourse _nextAuditCourse;
-
-    private NextAuditCourse() {
-        NextAvailableNumber = 2000;
-    }
-
-    public static NextAuditCourse GetInstance
+    public class NextAuditCourse : NextUniqueNumber
     {
-        get 
-        {
-            if (_nextAuditCourse == null)
-            {
-                _nextAuditCourse = dbContext.NextAuditCourses.SingleOrDefault();
+        private static NextAuditCourse _nextAuditCourse;
 
+        private NextAuditCourse()
+        {
+            NextAvailableNumber = 2000;
+        }
+
+        public static NextAuditCourse GetInstance
+        {
+            get
+            {
                 if (_nextAuditCourse == null)
                 {
-                    _nextAuditCourse = new NextAuditCourse();
+                    _nextAuditCourse = dbContext.NextAuditCourses.SingleOrDefault();
 
-                    dbContext.NextUniqueNumbers.Add(_nextAuditCourse);
+                    if (_nextAuditCourse == null)
+                    {
+                        _nextAuditCourse = new NextAuditCourse();
+
+                        dbContext.NextUniqueNumbers.Add(_nextAuditCourse);
+                    }
                 }
+                return _nextAuditCourse;
             }
-            return _nextAuditCourse;
         }
     }
-}
 
-public class NextMasteryCourse : NextUniqueNumber
-{
-    private static NextMasteryCourse _nextMasteryCourse;
-
-    private NextMasteryCourse() {
-        NextAvailableNumber = 20000;
-    }
-
-    public static NextMasteryCourse GetInstance
+    public class NextMasteryCourse : NextUniqueNumber
     {
-        get
-        {
-            if (_nextMasteryCourse == null)
-            {
-                _nextMasteryCourse = dbContext.NextMasteryCourses.SingleOrDefault();
+        private static NextMasteryCourse _nextMasteryCourse;
 
+        private NextMasteryCourse()
+        {
+            NextAvailableNumber = 20000;
+        }
+
+        public static NextMasteryCourse GetInstance
+        {
+            get
+            {
                 if (_nextMasteryCourse == null)
                 {
-                    _nextMasteryCourse = new NextMasteryCourse();
+                    _nextMasteryCourse = dbContext.NextMasteryCourses.SingleOrDefault();
 
-                    dbContext.NextUniqueNumbers.Add(_nextMasteryCourse);
+                    if (_nextMasteryCourse == null)
+                    {
+                        _nextMasteryCourse = new NextMasteryCourse();
+
+                        dbContext.NextUniqueNumbers.Add(_nextMasteryCourse);
+                    }
                 }
+                return _nextMasteryCourse;
             }
-            return _nextMasteryCourse;
         }
     }
-}
 
-public class StoredProcedure
-{
-    public static long? NextUniqueNumber(string discriminator)
+    public class StoredProcedure
     {
-        return 0;
+        public static long? NextUniqueNumber(string discriminator)
+        {
+            return 0;
+        }
     }
 }

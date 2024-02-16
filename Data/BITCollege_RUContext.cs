@@ -44,17 +44,16 @@ namespace BITCollege_RU.Data
 
         public System.Data.Entity.DbSet<BITCollege_RU.Models.HonoursState> HonoursStates { get; set; }
 
-        object placeHolderVariable;
-        public System.Data.Entity.DbSet<NextUniqueNumber> NextUniqueNumbers { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextUniqueNumber> NextUniqueNumbers { get; set; }
 
-        public System.Data.Entity.DbSet<NextAuditCourse> NextAuditCourses { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextAuditCourse> NextAuditCourses { get; set; }
 
-        public System.Data.Entity.DbSet<NextGradedCourse> NextGradedCourses { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextGradedCourse> NextGradedCourses { get; set; }
 
-        public System.Data.Entity.DbSet<NextMasteryCourse> NextMasteryCourses { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextMasteryCourse> NextMasteryCourses { get; set; }
 
-        public System.Data.Entity.DbSet<NextRegistration> NextRegistrations { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextRegistration> NextRegistrations { get; set; }
 
-        public System.Data.Entity.DbSet<NextStudent> NextStudents { get; set; }
+        public System.Data.Entity.DbSet<BITCollege_RU.Models.NextStudent> NextStudents { get; set; }
     }
 }

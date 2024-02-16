@@ -250,30 +250,25 @@
     <Content Include="Views\HonoursStates\Index.cshtml" />
     <Content Include="Views\ProbationStates\Index.cshtml" />
     <Content Include="Views\RegularStates\Index.cshtml" />
-    <Content Include="Views\NextAuditCourses\Create.cshtml" />
     <Content Include="Views\NextAuditCourses\Delete.cshtml" />
     <Content Include="Views\NextAuditCourses\Details.cshtml" />
     <Content Include="Views\NextAuditCourses\Edit.cshtml" />
-    <Content Include="Views\NextAuditCourses\Index.cshtml" />
-    <Content Include="Views\NextGradedCourses\Create.cshtml" />
     <Content Include="Views\NextGradedCourses\Delete.cshtml" />
     <Content Include="Views\NextGradedCourses\Details.cshtml" />
     <Content Include="Views\NextGradedCourses\Edit.cshtml" />
-    <Content Include="Views\NextGradedCourses\Index.cshtml" />
-    <Content Include="Views\NextMasteryCourses\Create.cshtml" />
     <Content Include="Views\NextMasteryCourses\Delete.cshtml" />
     <Content Include="Views\NextMasteryCourses\Details.cshtml" />
     <Content Include="Views\NextMasteryCourses\Edit.cshtml" />
-    <Content Include="Views\NextMasteryCourses\Index.cshtml" />
-    <Content Include="Views\NextRegistrations\Create.cshtml" />
     <Content Include="Views\NextRegistrations\Delete.cshtml" />
     <Content Include="Views\NextRegistrations\Details.cshtml" />
     <Content Include="Views\NextRegistrations\Edit.cshtml" />
-    <Content Include="Views\NextRegistrations\Index.cshtml" />
-    <Content Include="Views\NextStudents\Create.cshtml" />
     <Content Include="Views\NextStudents\Delete.cshtml" />
     <Content Include="Views\NextStudents\Details.cshtml" />
     <Content Include="Views\NextStudents\Edit.cshtml" />
+    <Content Include="Views\NextAuditCourses\Index.cshtml" />
+    <Content Include="Views\NextGradedCourses\Index.cshtml" />
+    <Content Include="Views\NextMasteryCourses\Index.cshtml" />
+    <Content Include="Views\NextRegistrations\Index.cshtml" />
     <Content Include="Views\NextStudents\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

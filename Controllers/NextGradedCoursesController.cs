@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using BITCollege_RU.Data;
+using BITCollege_RU.Models;
 
 namespace BITCollege_RU.Controllers
 {
