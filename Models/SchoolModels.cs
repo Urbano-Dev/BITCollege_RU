@@ -10,6 +10,10 @@ using Utility;
 using System.Data.Entity;
 using BITCollege_RU.Data;
 using BITCollege_RU.Models;
+using System.Data.SqlClient;
+using System.Data;
+using System.Runtime.InteropServices.WindowsRuntime;
+using BITCollege_RU.Migrations;
 
 namespace BITCollege_RU.Models
 {
@@ -32,7 +36,6 @@ namespace BITCollege_RU.Models
         [ForeignKey("Course")]
         public int CourseId { get; set; }
 
-        [Required]
         [Display(Name = "Registration\nNumber")]
         public long RegistraionNumber { get; set; }
 
@@ -49,7 +52,7 @@ namespace BITCollege_RU.Models
         public string Notes { get; set; }
 
         //
-        public void SetNextRegistrationNumber() { }
+        public void SetNextRegistrationNumber() { RegistraionNumber = (long)StoredProcedure.NextNumber(NextRegistration.GetInstance.ToString()); }
 
         // navigation properties - represents 1 cardinality.
         public virtual Student Student { get; set; }
@@ -96,8 +99,6 @@ namespace BITCollege_RU.Models
         [ForeignKey("AcademicProgram")]
         public int? AcademicProgramId { get; set; }
 
-        [Required]
-        [Range(10000000, 99999999)]
         [Display(Name = "Student\nNumber")]
         public long StudentNumber { get; set; }
 
@@ -161,7 +162,11 @@ namespace BITCollege_RU.Models
         }
 
         //
-        public void SetNextStudentNumber() { }
+        public void SetNextStudentNumber() 
+        {
+            
+            StudentNumber = (long)StoredProcedure.NextNumber(NextStudent.GetInstance.ToString());
+        }
 
         // navigation properties - represents 1 or 0 - 1 cardinality.
         public virtual GradePointState Grade { get; set; }
@@ -260,6 +265,10 @@ namespace BITCollege_RU.Models
             if (student.GradePointAverage > UpperLimit)
             {
                 student.GradePointStateId = ProbationState.GetInstance.GradePointStateId;
+            } 
+            else if(student.GradePointAverage < 0 || student.GradePointAverage == null)
+            {
+                student.GradePointStateId = SuspendedState.GetInstance.GradePointStateId;
             }
 
             dbContext.SaveChanges();
@@ -424,6 +433,10 @@ namespace BITCollege_RU.Models
             {
                 student.GradePointStateId = RegularState.GetInstance.GradePointStateId;
             }
+            else if (student.GradePointAverage > UpperLimit)
+            {
+                student.GradePointStateId = HonoursState.GetInstance.GradePointStateId;
+            }
 
             dbContext.SaveChanges();
         }
@@ -443,7 +456,6 @@ namespace BITCollege_RU.Models
         [ForeignKey("AcademicProgram")]
         public int? AcademicProgramId { get; set; }
 
-        [Required]
         [Display(Name = "Course\nNumber")]
         public string CourseNumber { get; set; }
 
@@ -494,7 +506,7 @@ namespace BITCollege_RU.Models
         //
         public override void SetNextCourseNumber()
         {
-            throw new NotImplementedException();
+            CourseNumber = $"G-{StoredProcedure.NextNumber(NextGradedCourse.GetInstance.ToString())}";
         }
     }
 
@@ -506,7 +518,7 @@ namespace BITCollege_RU.Models
         //
         public override void SetNextCourseNumber()
         {
-            throw new NotImplementedException();
+            CourseNumber = $"A-{StoredProcedure.NextNumber(NextAuditCourse.GetInstance.ToString())}";
         }
     }
 
@@ -522,7 +534,7 @@ namespace BITCollege_RU.Models
         //
         public override void SetNextCourseNumber()
         {
-            throw new NotImplementedException();
+            CourseNumber = $"M-{StoredProcedure.NextNumber(NextMasteryCourse.GetInstance.ToString())}";
         }
     }
 
@@ -633,7 +645,7 @@ namespace BITCollege_RU.Models
         {
             NextAvailableNumber = 2000;
         }
-
+        
         public static NextAuditCourse GetInstance
         {
             get
@@ -685,9 +697,33 @@ namespace BITCollege_RU.Models
 
     public class StoredProcedure
     {
-        public static long? NextUniqueNumber(string discriminator)
-        {
-            return 0;
+        public static long? NextNumber(string discriminator)
+        {            
+            long? returnValue = 0;
+            try
+            {
+
+            SqlConnection connection = new SqlConnection("Data Source=localhost; " +
+            "Initial Catalog=BITCollege_FLContext;Integrated Security=True");
+            SqlCommand storedProcedure = new SqlCommand("next_number", connection);
+            storedProcedure.CommandType = CommandType.StoredProcedure;
+            storedProcedure.Parameters.AddWithValue("@Discriminator", discriminator);
+            SqlParameter outputParameter = new SqlParameter("@NewVal", SqlDbType.BigInt)
+            {
+                Direction = ParameterDirection.Output
+            };
+            storedProcedure.Parameters.Add(outputParameter);
+            connection.Open();
+            storedProcedure.ExecuteNonQuery();
+            connection.Close();
+            returnValue = (long?)outputParameter.Value;
+            } 
+            catch (Exception)
+            {
+                return returnValue;
+            }
+
+            return returnValue;
         }
     }
 }

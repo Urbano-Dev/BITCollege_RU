@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: GradedCourses
         public ActionResult Index()
         {
-            return View(db.Courses.ToList());
+            return View(db.GradedCourses.ToList());
         }
 
         // GET: GradedCourses/Details/5
@@ -52,6 +52,7 @@ namespace BITCollege_RU.Controllers
         {
             if (ModelState.IsValid)
             {
+                gradedCourse.SetNextCourseNumber();
                 db.Courses.Add(gradedCourse);
                 db.SaveChanges();
                 return RedirectToAction("Index");

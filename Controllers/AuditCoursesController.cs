@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: AuditCourses
         public ActionResult Index()
         {
-            return View(db.Courses.ToList());
+            return View(db.AuditCourses.ToList());
         }
 
         // GET: AuditCourses/Details/5
@@ -52,6 +52,7 @@ namespace BITCollege_RU.Controllers
         {
             if (ModelState.IsValid)
             {
+                auditCourse.SetNextCourseNumber();
                 db.Courses.Add(auditCourse);
                 db.SaveChanges();
                 return RedirectToAction("Index");

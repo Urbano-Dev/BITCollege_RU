@@ -54,6 +54,7 @@ namespace BITCollege_RU.Controllers
         {
             if (ModelState.IsValid)
             {
+                registration.SetNextRegistrationNumber();
                 db.Registrations.Add(registration);
                 db.SaveChanges();
                 return RedirectToAction("Index");

@@ -18,7 +18,7 @@ namespace BITCollege_RU.Controllers
         // GET: MasteryCourses
         public ActionResult Index()
         {
-            return View(db.Courses.ToList());
+            return View(db.MasteryCourses.ToList());
         }
 
         // GET: MasteryCourses/Details/5
@@ -52,6 +52,7 @@ namespace BITCollege_RU.Controllers
         {
             if (ModelState.IsValid)
             {
+                masteryCourse.SetNextCourseNumber();
                 db.Courses.Add(masteryCourse);
                 db.SaveChanges();
                 return RedirectToAction("Index");
