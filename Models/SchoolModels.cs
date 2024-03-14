@@ -243,8 +243,7 @@ namespace BITCollege_RU.Models
                 {
                     _suspendedState = dbContext.SuspendedStates.SingleOrDefault();
 
-                    if (_suspendedState == null)
-                    {
+                    if (_suspendedState == null) {
                         _suspendedState = new SuspendedState();
                         dbContext.GradePointStates.Add(_suspendedState);
                     }
@@ -255,7 +254,12 @@ namespace BITCollege_RU.Models
 
         public override double TuitionRateAdjustment(Student student)
         {
-            return TuitionFactor;
+            double tuition = TuitionFactor;
+            if (student.GradePointAverage < 0.75)
+                tuition += 0.02;
+            else if (student.GradePointAverage < 0.50)
+                tuition += 0.05;
+            return tuition * student.OutstandingFees;
         }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
@@ -312,7 +316,15 @@ namespace BITCollege_RU.Models
             }
         }
 
-        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) {
+            double tuition = TuitionFactor;
+            if (student.Registration.Count(reg => reg.Grade != null) >= 5)
+            {
+                tuition = 1.035;
+            }
+            
+            return tuition * student.OutstandingFees; 
+        }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
@@ -367,7 +379,9 @@ namespace BITCollege_RU.Models
             }
         }
 
-        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) { 
+            return TuitionFactor * student.OutstandingFees; 
+        }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
@@ -423,7 +437,14 @@ namespace BITCollege_RU.Models
             }
         }
 
-        public override double TuitionRateAdjustment(Student student) { return TuitionFactor; }
+        public override double TuitionRateAdjustment(Student student) {
+            double tuition = TuitionFactor;
+            if (student.Registration.Count(reg => reg.Grade != null) >= 5)
+                tuition -= 0.05;
+            if (student.GradePointAverage > 4.25)
+                tuition -= 0.02;
+            return tuition * student.OutstandingFees; 
+        }
 
         // Overrides the StateChangeCheck method from the base class GradePointState
         // Checks if the student's GradePointAverage exceeds the UpperLimit. Then assign GetInstace GradePointStateId.
