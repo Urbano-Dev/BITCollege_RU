@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
+using BITCollege_RU.Data;
+
 namespace BITCollege_RU.Data
 {
     public class BITCollege_RUContext : DbContext
@@ -14,7 +16,6 @@ namespace BITCollege_RU.Data
         // automatically whenever you change your model schema, please use data migrations.
         // For more information refer to the documentation:
         // http://msdn.microsoft.com/en-us/data/jj591621.aspx
-        BITCollege_RUContext context = new BITCollege_RUContext();
 
         public BITCollege_RUContext() : base("name=BITCollege_RUContext")
         {
